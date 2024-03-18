@@ -1,8 +1,4 @@
-#Space Invaders - Part 9
-#Image for Invader
-#Image for Player
-#Image for background
-#Python 2.7 on Mac
+
 import turtle
 import math
 import random
@@ -11,11 +7,11 @@ import random
 wn = turtle.Screen()
 wn.bgcolor("black")
 wn.title("Space Invaders")
-#wn.bgpic("space_invaders_background.gif")
+#wn.bgpic("fondo.jpg")
 
 #Register the shapes
 #turtle.register_shape("invader.gif")
-#turtle.register_shape("player.gif")
+#turtle.register_shape("classic")
 
 #Draw border
 border_pen = turtle.Turtle()
@@ -46,7 +42,7 @@ score_pen.hideturtle()
 #Create the player turtle
 player = turtle.Turtle()
 player.color("blue")
-player.shape("triangle") #############
+player.shape("classic") #############
 player.penup()
 player.speed(0)
 player.setposition(0, -250)
