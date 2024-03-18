@@ -131,6 +131,52 @@ def Close_all():
     turtle.write("Game Over", move = False, align = "center", font = ("Arial", 30, "normal"))
     time.sleep(3)
     wn._delete("all")
+    wn.bye()
+    #exit()
+    
+    '''
+def iniciar_mano():
+    bg = cv2.cvtColor(frameAux,cv2.COLOR_BGR2GRAY)
+    '''
+    
+def rec_acciones():
+    # Determinar la región de interés
+    ROI = frame[5:350,200:635]
+    grayROI = cv2.cvtColor(ROI,cv2.COLOR_BGR2GRAY)
+    
+    # Región de interés del fondo de la imagen
+    bgROI = bg[5:350,200:635]
+    
+    dif = cv2.absdiff(grayROI,bgROI)
+    _, th = cv2.threshold(dif, 30, 255, cv2.THRESH_BINARY)
+    th = cv2.medianBlur(th, 7)
+    
+    # Encontrando los contornos de la imagen binaria
+    cnts, _ = cv2.findContours(th,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = sorted(cnts,key=cv2.contourArea,reverse=True)[:1]
+    cv2.drawContours(ROI, cnts, 0, (0,255,0),1)
+    
+    for cnt in cnts:
+
+        # Encontrar el centro del contorno
+        M = cv2.moments(cnt)
+        if M["m00"] == 0: M["m00"]=1
+        x = int(M["m10"]/M["m00"])
+        y = int(M["m01"]/M["m00"])
+        cv2.circle(ROI,tuple([x,y]),5,(0,255,0),-1)
+        
+        # Punto más alto del contorno
+        ymin = cnt.min(axis=1)
+        cv2.circle(ROI,tuple(ymin[0]),5,color_ymin,-1)
+        
+        # Contorno encontrado a través de cv2.convexHull
+        hull1 = cv2.convexHull(cnt)
+        cv2.drawContours(ROI,[hull1],0,color_contorno,2)
+    
+    if (x<150): move_left()
+    if (x>285): move_right()
+    if (abs(y-ymin[0][1])>100): fire_bullet()
+    else: print("disparar")
     
     
 
@@ -158,57 +204,15 @@ while True:
     if ret == False: break
 
     # Redimensionar la imagen para que tenga un ancho de 640
-    frame = imutils.resize(frame,width=1080)
+    frame = imutils.resize(frame,width=640)
     frame = cv2.flip(frame,1)
     frameAux = frame.copy()
     
-    cv2.rectangle(frame,(200,5),(1070,600),color_zona1,1)
-    cv2.rectangle(frame,(200,5),(550,600),color_zona2,1)
-    cv2.rectangle(frame,(740,5),(1070,600),color_zona2,1)
+    cv2.rectangle(frame,(200-1,5-1),(635+1,350+1),color_zona1,1)
+    cv2.rectangle(frame,(200,5),(350,350),color_zona2,1)
+    cv2.rectangle(frame,(485,5),(635,350),color_zona2,1)
     
-    if bg is not None:
-        
-        # Determinar la región de interés
-        ROI = frame[5:600,200:1070]
-        grayROI = cv2.cvtColor(ROI,cv2.COLOR_BGR2GRAY)
-        
-        # Región de interés del fondo de la imagen
-        bgROI = bg[5:600,200:1070]
-        
-        dif = cv2.absdiff(grayROI,bgROI)
-        _, th = cv2.threshold(dif, 30, 255, cv2.THRESH_BINARY)
-        th = cv2.medianBlur(th, 7)
-        
-        # Encontrando los contornos de la imagen binaria
-        cnts, _ = cv2.findContours(th,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        cnts = sorted(cnts,key=cv2.contourArea,reverse=True)[:1]
-        cv2.drawContours(ROI, cnts, 0, (0,255,0),1)
-        
-        for cnt in cnts:
-
-            # Encontrar el centro del contorno
-            M = cv2.moments(cnt)
-            if M["m00"] == 0: M["m00"]=1
-            x = int(M["m10"]/M["m00"])
-            y = int(M["m01"]/M["m00"])
-            cv2.circle(ROI,tuple([x,y]),5,(0,255,0),-1)
-            
-            # Punto más alto del contorno
-            ymin = cnt.min(axis=1)
-            cv2.circle(ROI,tuple(ymin[0]),5,color_ymin,-1)
-            
-            # Contorno encontrado a través de cv2.convexHull
-            hull1 = cv2.convexHull(cnt)
-            cv2.drawContours(ROI,[hull1],0,color_contorno,2)
-            
-            # Defectos convexos
-            hull2 = cv2.convexHull(cnt,returnPoints=False)
-            defects = cv2.convexityDefects(cnt,hull2)
-        
-        if (x<350): move_left()
-        if (x>540): move_right()
-        if (abs(y-ymin[0][1])>150): print("No disparar")
-        else: fire_bullet()
+    if bg is not None: rec_acciones()
         
     for enemy in enemies:
         #Move the enemy
