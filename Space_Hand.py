@@ -134,10 +134,6 @@ def Close_all():
     wn.bye()
     #exit()
     
-    '''
-def iniciar_mano():
-    bg = cv2.cvtColor(frameAux,cv2.COLOR_BGR2GRAY)
-    '''
     
 def rec_acciones():
     # Determinar la región de interés
